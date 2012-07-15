@@ -1,0 +1,36 @@
+Ah, I did not think about control flow pointers. Easy workaround might be to convert all pointers to their difference (from their address to the address they point to) on the saved disk, then recalculate and replace with the 'correct' address on the new machine.
+
+I don't know enough about the forth compiler and assembly language itself to do create my own 'relocator', but I'm learning more every day =D
+
+I'm assuming your base machine is going to have redpower forth pre-loaded, so all that would need to be done is transfer dictionary data from one machine then append that data to the dictionary on the 'new' machine, extend the dictionary pointers to cover that new data, and recalculate any pointers inside (if the pointers pointed to an area in the default Fourth boot, they stay the same, otherwise they are difference recalculated).
+
+I need to find out how FORTH stores defined variables; if they are stored in the dictionary or somewhere else, and just more general information on how forth compiler works and stores compiled data.
+
+If pointers point to values within the copy area, they must be difference recalculated, otherwise they remain pointed to the same location.
+
+Will need to change pointers that need to be relocated with a flag (or if they are already flagged as a pointer by forth code, i can just search for the data with that flag, append the difference value to the end of the save block, then when it loads that data back in replace that pointer data flag-HERE + HERE
+
+At some point we are going to need to find the addresses of all pointers and figure out if they point inside or outside the copyblock, if they point outside the copyblock, assume they point to forth address and ignore them (libraries must be fully complete, there are workarounds but those are outside my scope), if they point inside the copyblock the new pointer value will be the old value plus 'distancenew - distanceold' which will actually be a constant distdiff, equal to ( loadstart address - copyaddress )
+
+copystart = oldaddress of first data copied ( start of the first word to be copied)
+loadstart will =  somewhere close to new(HERE) ( address the data starts being loaded into)
+distdiff = ( loadstart - copystart)
+newaddress = oldpointeraddress + distdiff
+newpointervalue = oldpointervalue + distdiff
+
+At some point you need to figure out which pointers will 
+
+vars needed ( localcopystart, localcopyend, diskcopystart, normalcopyend = diskcopystart + localcopyend - localcopystart)
+vars to store on disk = diskcopystart, normalcopyend, diskcopyend, localcopystart
+vars to find on load = copystart, distdiff
+
+vars to create on copy
+vars to create on load
+compile load and copy program to all disks
+
+vars to prompt for = address of localcopystart, address of localcopyend, address of diskcopystart
+vars to calculate = disknormalcopyend, 
+
+COPY data will need to figure out which old pointers point within the copied data, to save load time you can calculate at copy time and append a list of those addresses to the end of data (store a var to normalcopydata end ), and save the address of copystart ( to end of data block, at the end of all addresses, (pop it onto Rstack at the beginning, then dump it onto data at the end)
+
+

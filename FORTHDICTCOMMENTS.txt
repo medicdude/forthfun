@@ -1,0 +1,21 @@
+( PARSEH , n -- bit0 ... bit15 , parses n into individual bit values with the highest endian bit on the top of the stack bitx TRUE = 1)
+HEX
+: PARSEH 10 0 DO DUP 1 AND SWAP 2/ LOOP DROP ;
+
+\ 46 BYTES
+\ : PARSEH 1 10 0 DO 2DUP AND SWAP 2* ROT LOOP DROP DROP ;
+\ Lookup Format, 170 Bytes Less CPU
+\ HEX : PARSEH DUP 1 AND SWAP DUP 2 AND SWAP DUP 4 AND SWAP DUP 8 AND SWAP DUP 10 AND SWAP DUP 20 AND SWAP DUP 40 AND SWAP DUP 80 AND SWAP DUP 100 AND SWAP DUP 200 AND SWAP DUP 400 AND SWAP DUP 800 AND SWAP DUP 1000 AND SWAP DUP 2000 AND SWAP DUP 4000 AND SWAP 8000 AND ; (bitx TRUE = nonzero)
+
+( PARSEL , n -- bit15 ... bit0 , parses n into individual bit values with the lowest endian bit on the top of the stack bitx TRUE = -8000)
+HEX
+: PARSEL 10 0 DO DUP 8000 AND IF 1 ELSE 0 SWAP 2* LOOP DROP ;
+: 
+
+\ Using Rstack, 60 Bytes More CPU, returns TRUE values as 1 for immediate display or var storage, Less CPU than Iffing them to 1 or 0
+\ : PARSEL 10 0 DO DUP 1 AND >R 2/ LOOP DROP 10 0 DO R> LOOP;
+
+\ MORE processing cycles required for below code
+\ : PARSEL 8000 10 0 DO 2DUP AND SWAP 2/ ROT LOOP DROP DROP ;
+\ Lookup Format below, Less CPU More Memory usage
+\ HEX : PARSEL DUP 8000 AND SWAP DUP 4000 AND SWAP DUP 2000 AND SWAP DUP 1000 AND SWAP DUP 800 AND SWAP DUP 400 AND SWAP DUP 200 AND SWAP DUP 100 AND SWAP DUP 80 AND SWAP DUP 40 AND SWAP DUP 20 AND SWAP DUP 10 AND SWAP DUP 8 AND SWAP DUP 4 AND SWAP DUP 2 AND SWAP 1 AND ; (bitx TRUE = nonzero)

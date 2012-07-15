@@ -1,0 +1,95 @@
+BIT STRING PARSING
+( parsing the entire bit input stream makes complex systems easier to understand by breaking up the incoming data )
+( for maximum performance on less complex systems, individual comparison operations should be used instead. Parsing only improves performance on more complex systems )
+( for even more complex systems, after using this to initialize initial values, you can comparison check with XOR to skip code involving your static values )
+
+( BITE method )
+: BITE DUP 1 AND SWAP 2/ ( n -- nR nQ, leaves bit0 on bottom of stack, can be looped with itself to parse additional bits)
+: BITE DUP 2/ SWAP 1 AND ( n -- nQ nR, leaves bit0 on top of stack)
+( this is essentially a 2 /MOD, with stack format n -- nR nQ. the LSB, Least Significant Bit, of n is 'chopped' off and dropped on top of the stack. Example 1101 becomes 0110 0001 )
+( this is one method for reading a bitstring one bit at a time, LSB towards MSB )
+input 
+BITE bit0 !
+BITE bit1 !
+BITE bit2 !
+BITE bit3 !
+DROP
+( you'll be leftover with the quotient of the input on the stack, each BITE a rightshift. if you parsed the whole string it will just be 0, if these are leftover trash bits DROP them, otherwise pass or store them somewhere else )
+( at any point you can check for a blank input with a DUP IF ELSE BREAK THEN, which may save processing cycles, depending on your expected input string )
+( it makes a lot of sense to do this at the beginning if you're expecting a lot of empty strings )
+
+( AND = method, simply checks each bit position with AND, storing the result )
+( DUPs are used to keep the input on the bottom of the stack. It will use more stack space but might be faster to dump the input value onto the stack multiple times at the start, instead of DUP each step )
+: BITS 1 16 0 DO 2DUP AND . 2* LOOP DROP ;
+input DUP DUP DUP
+1 AND bit0!
+10 AND bit1!
+100 AND bit2!
+1000 AND bit4!
+
+: PARSE16 
+DUP 8000 AND SWAP ( bit15 on bottom on stack)
+DUP 4000 AND SWAP ( bit14)
+DUP 2000 AND SWAP ( bit13)
+DUP 1000 AND SWAP ( bit12)
+
+DUP 800 AND SWAP ( bit11)
+DUP 400 AND SWAP ( bit10)
+DUP 200 AND SWAP ( bit9)
+DUP 100 AND SWAP ( bit8)
+
+DUP 80 AND SWAP ( bit7)
+DUP 40 AND SWAP ( bit6)
+DUP 20 AND SWAP ( bit5)
+DUP 10 AND SWAP ( bit4)
+
+DUP 8 AND SWAP ( bit3)
+DUP 4 AND SWAP ( bit2)
+DUP 2 AND SWAP ( bit1)
+1 AND ( destructively checks bit0)
+
+input 0 1 DO DUP I AND . I +LOOP
+: PARSE16. 0 1 DO DUP I AND . I +LOOP ;
+
+
+Comparisons
+Partial Match
+No Match
+Exact Match
+Inclusive Match
+
+	SINGLE BIT COMPARATORS
+	Partial match is the same as inclusive match
+test input AND IF ." Partial/Inclusive Match TRUE" THEN
+
+	No match is a false return for partial match
+test input AND IF ELSE ." No Match" THEN
+
+Combining the two
+test input AND IF ." Match TRUE, partial/inclusive match" ELSE ." Match FALSE, no match" THEN
+
+
+	BIT STRING COMPARISON METHODS
+	Partial match
+test input AND IF ." Partial ( possibly inclusive or exact ) input match to test" THEN
+
+	
+	Inclusive match
+test DUP input AND XOR ( FALSE = inclusive match, TRUE = Partial or no match)
+test DUP input AND XOR 0= ( TRUE = inclusive match, FALSE = Partial or no match)
+( I call this the "AND XOR" method, preferred because it is easier to read when reviewing the program. It uses the same number of cycles as the other two methods )
+( Sillybits says this operation is faster at rounding, but I don't know what that means or where it applies )
+
+This version is slightly easier to read, I call it 'and = if'
+test DUP input AND IF XOR ELSE 
+
+input nottest OR 1111 XOR IF ELSE ." Input includes test" THEN
+( where nottest is the test value with bits inverted, ex if you are testing for 0110, nottest is 1001. 1111 XOR is the binary way to invert )
+( The main problem with this this method is that it misfunctions TRUE if any higher bits are 1, because it does not use an AND operation to clean the bitstring, ex. if your input was 10100 instead of 00100 it would cause this method to fail TRUE, in rare situations this may be desirable)
+
+	Exact match
+input test XOR IF ELSE ." Input exactly matches output" THEN
+( XOR is a comparator, if any 
+
+: BITE DUP 2/ SWAP 1 AND ; : BITE. BITE . ;
+: COLORLIST 

@@ -1,0 +1,11 @@
+( PARSEH , n -- bit0 ... bit15 , parses n into individual bit values with the highest endian bit on the top of the stack bitx TRUE = 1)
+HEX
+: PARSEH 10 0 DO DUP 1 AND SWAP 2/ LOOP DROP ;
+
+( PARSEL , n -- bit15 ... bit0 , parses n into individual bit values with the lowest endian bit on the top of the stack bitx TRUE = -8000)
+HEX
+: PARSEL 10 0 DO DUP 8000 AND SWAP 2* LOOP DROP ;
+
+( PARSEL , n -- bit15 ... bit0 , identical to PARSEL but bitx TRUE = 1 more cycles usage)
+HEX
+: PARSEL 10 0 DO DUP 8000 AND IF 1 ELSE 0 THEN SWAP 2* LOOP DROP ;

@@ -1,0 +1,5 @@
+: BITS 0 1 DO I . I +LOOP ;
+
+: BITS1 8000 1 DO 1 I * . I +LOOP ;
+
+: BITS 16 0 DO 1 I 0 ?DO 2* LOOP . LOOP ;

@@ -1,0 +1,73 @@
+RADIX discussion
+Boolean Algrbra
+AND OR NOT
+Bit String Algebra
+65EL02 Memory storage addressing example, explaination, and manipulation
+Word definition example, explaination
+Redbus example, explaination, integration with memoryspace
+IF Nesting, Efficiency
+Loop examples
+Networking, Latency, Bandwidth, Multiplexing, time-divisonal
+Space-Time Tradeoff, Lookup Tables
+
+FORTH Errata
+Stack, LIFO, Postfix notation
+Words, Dictionary,  definitions
+
+( XOR is the basis for all comparators, AND is a mask, or as I like to call it, a bit cleaner, clensear, trash filter. )
+
+FUTURE FEATURES:
+0x10 Compact storage for console char strings ( 2 x 8bit?)
+0x10 Basic physics calculations
+0x10 Autopilot, waypoints, intercept, orbit, approach
+0x10 Fixed weapons hardpoints, tracking calculations
+0x10 Emulation and Storage for ladar/radar system
+
+System that pauses / plugs pipes, allowing item counters to data burst to IOX
+VAR for current IOXread, update at the end of all comparisons
+VAR set to 1 when RBP sets to a different address
+CONSTANT values for each color, color combiner.
+Delta values for IOX input changes
+Code space to run code when delta values
+Defining array space to store arrayed variables
+Setting MARKER and MARKEREND into dictionary, copying and loading segments of the dictionary instead of recompiling
+Menu system
+
+Q: will compiled functions based ONLY on constants store that new calculated value on compilation, or re-calculate every time the code is performed?
+A: No, calculation performed every time
+Q: does TICK 'wait until' the next tick, or wait exactly 1000 cycles?
+A: wait until, and all instruction cycles not used up when calling TICK are saved and can be used within next tick
+E: KEY interrupts and waits until a keypress, use KEY? IF KEY keychar = ELSE 0 THEN to check for specific key ( TRUE if specific key is pressed, FALSE if not)
+E: IOX can only change outputs every 3 ticks, strongly recommend re-wording : IOXo 3 TICKS IOX! ; ( if using RBP! set a scratch variable, if >0< only wait 1 tick clear)
+Q: Is there a way to reword RBP! to set a scratchvar when redbus change occurs?
+Q: What is the tick delay from setting an IOX to the output appearing?
+A: Output refresh (response) time for IOX!, IOXSET, and IOXRST is 3 Ticks. Read response time is instantaneous. A change in IOXout will not be indicated by IOXin until 3 ticks afterward ( 2 RB changes and 1 tick)
+Q: How do I store compiled word groups straight to disk blocks, so I don't have to recompile it from block edits? Need to set a var WORD with it's own address at the start of compilation. Forget that word to un-install, block copy/write from that varword to ( HERE) to disk to save, start at block 1.
+
+Bug Code:
+: IOXLOOP PAGE BEGIN IOX@ . CR TICK KEY 32 = UNTIL;
+ KEY stops code until keypress is received use KEY? IF KEY 32 = instead
+Correct loop
+: IOXLOOP BEGIN PAGE 0 0 AT-XY 50 0 DO TICK IOX@ . CR LOOP KEY? UNTIL ;
+Progrressively slower the more characters written to screen, CRs and screen printing takes up a lot of cycles?
+
+: IOXLOOP BEGIN PAGE 0 0 AT-XY 50 0 DO TICK IOX@ . LOOP KEY? UNTIL ;
+: testloop BEGIN 20 0 DO TICK KEY? IF ABORT THEN LOOP 1 . AGAIN ;
+prints a robust once every second
+: testloop2 BEGIN 20 0 DO TICK 1 . KEY? IF ABORT THEN LOOP 2 . AGAIN ;
+: testloop3 BEGIN TICK 1 . KEY? UNTIL ;
+: testloop4 BEGIN TICK 1 . CR KEY? UNTIL ;
+Prints 20 cycles per second
+: testIOX BEGIN IOX@ . CR KEY? UNTIL ;
+Prints 10 cycles per second
+
+singletick IOXswap 20 ticks 8 secs
+doubletick ioxswap 20 ticks 6 secs
+
+: MONITOR IOX@ BEGIN TICK IOX@ TUCK XOR UNTIL . ;
+watchdog IOX every tick until it changes? WORKS
+
+:testout4 BEGIN IOX@ DUP 2 AND IF ABORT THEN IF 0 ELSE 1 THEN IOX! TICK AGAIN;
+:testout5 BEGIN IOX@ DUP 2 AND IF ABORT THEN 1 XOR IOX! TICK AGAIN;
+:testout6 BEGIN IOX@ DUP 2 AND IF ABORT THEN 1 XOR IOX! AGAIN;
+:testout7 BEGIN IOX@ 8 AND IF ABORT THEN 1 IOX! TICK 3 IOX! TICK 7 IOX! TICK 6 IOX! TICK 4IOX! TICK 0 IOX! TICK AGAIN ;
