@@ -1,0 +1,10 @@
+funforth Relocator Branch
+
+Project Purpose
+To create a relocator program/instruction set that successfully copies/moves already compiled code from RAM to disk
+To create a loader program that copies data from disk into another computer's RAM, regardless of address position installed
+
+Major problem: pointers that pointed within code block will no longer point to the correct location
+Solution: the distance-difference in address space will be the same for every pointer. 
+Save program must find pointer locations and append to the end of the save file. Must also save original memory location.
+Load program will calculate distance-difference from old memory location to new memory location, and update all pointers with this difference.
